@@ -21,7 +21,6 @@ const userSchema = new Schema<TUser, UserModel>(
     password: {
       type: String,
       required: true,
-      select: 0,
     },
     phone: {
       type: String,
@@ -71,21 +70,21 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// set "" after saving password
-userSchema.post('save', function (doc, next) {
-  doc.password = '';
-  next();
-});
-
+// // set "" after saving password
+// userSchema.post('save', function (doc, next) {
+//   doc.password = '';
+//   next();
+// });
+//
 // userSchema.statics.isUserExistsByCustomId = async function (id: string) {
 //   return await User.findOne({ id }).select('+password');
 // };
 
-userSchema.statics.isPasswordMatched = async function (
-  plainTextPassword,
-  hashedPassword,
-) {
-  return await bcrypt.compare(plainTextPassword, hashedPassword);
-};
+// userSchema.statics.isPasswordMatched = async function (
+//   plainTextPassword,
+//   hashedPassword,
+// ) {
+//   return await bcrypt.compare(plainTextPassword, hashedPassword);
+// };
 
 export const User = model<TUser, UserModel>('users', userSchema);
