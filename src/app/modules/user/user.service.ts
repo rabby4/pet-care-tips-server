@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import config from '../../config';
 import { User } from './user.model';
+import { sendEmail } from '../../utils/sendEmail';
 
 // create service function for create or register user
 const createUserIntoDB = async (payload: TUser) => {
@@ -51,13 +52,35 @@ const loginUser = async (payload: TLoginUser) => {
   };
 };
 
-const changeStatus = async (id: string, payload: { status: string }) => {
-  const result = await User.findByIdAndUpdate(id, payload, { new: true });
-  return result;
+const forgetPassword = async (email: string) => {
+  // checking if the user is exists
+  const user = await User.findOne({ email });
+  console.log(user);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'The user not found!');
+  }
+
+  // create access token and send to client
+  const userData = {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+  };
+
+  const resetToken = jwt.sign(userData, config.jwt_access_token as string, {
+    expiresIn: '10m',
+  });
+
+  const resetUILink = `${config.reset_password_ui_link}?id=${user._id}&token=${resetToken}`;
+
+  sendEmail(user.email, resetUILink);
+
+  console.log(resetUILink);
 };
 
-export const UserService = {
+export const UserServices = {
   createUserIntoDB,
   loginUser,
-  changeStatus,
+  forgetPassword,
 };

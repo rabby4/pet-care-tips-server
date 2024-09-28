@@ -24,6 +24,14 @@ const loginValidationSchema = z.object({
   }),
 });
 
+const forgetPasswordValidationSchema = z.object({
+  body: z.object({
+    email: z.string({
+      required_error: 'Email is required!',
+    }),
+  }),
+});
+
 // const changeStatusValidationSchema = z.object({
 //   body: z.object({
 //     status: z.enum([...UserStatus] as [string, ...string[]]),
@@ -33,5 +41,6 @@ const loginValidationSchema = z.object({
 export const UserValidation = {
   createUserValidationSchema,
   loginValidationSchema,
+  forgetPasswordValidationSchema,
   // changeStatusValidationSchema,
 };
