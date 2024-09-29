@@ -9,7 +9,11 @@ import { sendEmail } from '../../utils/sendEmail';
 
 // create service function for create or register user
 const createUserIntoDB = async (payload: TUser) => {
-  const result = await User.create(payload);
+  const userData: Partial<TUser> = {
+    ...payload,
+    role: 'user',
+  };
+  const result = await User.create(userData);
   return result;
 };
 
@@ -18,15 +22,26 @@ const getAllUserFromDB = async () => {
   return result;
 };
 
+const getUserFromDB = async (token: string) => {
+  // check if the token is valid or not
+  const decoded = jwt.verify(
+    token,
+    config.jwt_access_token as string,
+  ) as JwtPayload;
+
+  const result = await User.findOne({ _id: decoded.id });
+  return result;
+};
+
 // create service function for login user
 const loginUser = async (payload: TLoginUser) => {
   console.log(payload.email, payload.password);
   // check if the user exists
-  const isUserExists = await User.findOne(
-    { email: payload.email },
-    { createdAt: 0, updatedAt: 0, __v: 0 },
+  const isUserExists = await User.isUserExists(
+    payload.email,
+    // { email: payload.email },
+    // { createdAt: 0, updatedAt: 0, __v: 0 },
   );
-  console.log('exist user', isUserExists);
 
   if (!isUserExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'User is not exist');
@@ -43,7 +58,7 @@ const loginUser = async (payload: TLoginUser) => {
   }
   // create access token
   const userData = {
-    id: isUserExists._id,
+    id: isUserExists.id,
     email: isUserExists.email,
     role: isUserExists.role,
   };
@@ -119,10 +134,21 @@ const resetPassword = async (
   );
 };
 
+const updateUserIntoDB = async (id: string, payload: Partial<TUser>) => {
+  const result = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  return result;
+};
+
 export const UserServices = {
   createUserIntoDB,
   getAllUserFromDB,
+  getUserFromDB,
   loginUser,
   forgetPassword,
   resetPassword,
+  updateUserIntoDB,
 };

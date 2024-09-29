@@ -21,6 +21,9 @@ router.post(
 // get all user data
 router.get('/', UserController.getAllUserFromDB);
 
+// get all user data
+router.get('/me', UserController.getUser);
+
 router.post(
   '/forget-password',
   validationRequest(UserValidation.forgetPasswordValidationSchema),
@@ -31,6 +34,12 @@ router.post(
   '/reset-password',
   validationRequest(UserValidation.resetPasswordValidationSchema),
   UserController.resetPassword,
+);
+
+router.patch(
+  '/:id',
+  validationRequest(UserValidation.updateUserValidationSchema),
+  UserController.updateUser,
 );
 
 export const UserRoutes = router;

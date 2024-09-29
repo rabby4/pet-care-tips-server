@@ -12,7 +12,7 @@ export interface TUser {
   occupation: string;
   about: string;
   image: string;
-  role: 'admin' | 'user';
+  role: 'superAdmin' | 'admin' | 'user';
   followers: Types.ObjectId;
   following: Types.ObjectId;
 }
@@ -23,7 +23,8 @@ export type TLoginUser = {
 
 export interface UserModel extends Model<TUser> {
   // myStaticMethod(): number;
-  // isUserExistsByCustomId(id: string): Promise<TUser>;
+  // isUserExists(email: string): Promise<TUser>;
+  isUserExists(email: string): Promise<TUser | null>;
   // isPasswordMatched(
   //   plainTextPassword: string,
   //   hashedPassword: string,

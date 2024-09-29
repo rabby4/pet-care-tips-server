@@ -43,6 +43,23 @@ const resetPasswordValidationSchema = z.object({
   }),
 });
 
+const updateUserValidationSchema = z.object({
+  body: z.object({
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    email: z.string().optional(),
+    password: z.string().optional(),
+    phone: z.string().optional(),
+    address: z.string().optional(),
+    occupation: z.string().optional(),
+    about: z.string().optional(),
+    image: z.string().optional(),
+    role: z.string().optional(),
+    followers: z.string().optional(),
+    following: z.string().optional(),
+  }),
+});
+
 // const changeStatusValidationSchema = z.object({
 //   body: z.object({
 //     status: z.enum([...UserStatus] as [string, ...string[]]),
@@ -54,5 +71,6 @@ export const UserValidation = {
   loginValidationSchema,
   forgetPasswordValidationSchema,
   resetPasswordValidationSchema,
+  updateUserValidationSchema,
   // changeStatusValidationSchema,
 };

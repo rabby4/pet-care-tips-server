@@ -21,6 +21,7 @@ const userSchema = new Schema<TUser, UserModel>(
     password: {
       type: String,
       required: true,
+      select: 0,
     },
     phone: {
       type: String,
@@ -39,7 +40,7 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     role: {
       type: String,
-      enum: ['admin', 'user'],
+      enum: ['superAdmin', 'admin', 'user'],
     },
     followers: {
       type: Schema.Types.ObjectId,
@@ -70,16 +71,15 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// // set "" after saving password
-// userSchema.post('save', function (doc, next) {
-//   doc.password = '';
-//   next();
-// });
+// set "" after saving password
+userSchema.post('save', function (doc, next) {
+  doc.password = '';
+  next();
+});
+userSchema.statics.isUserExists = async function (email: string) {
+  return await User.findOne({ email }).select('+password');
+};
 //
-// userSchema.statics.isUserExists = async function (email: string) {
-//   return await User.findOne({ email }).select('+password');
-// };
-
 // userSchema.statics.isPasswordMatched = async function (
 //   plainTextPassword,
 //   hashedPassword,

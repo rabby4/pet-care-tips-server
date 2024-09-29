@@ -23,6 +23,18 @@ const getAllUserFromDB = catchAsync(async (req, res) => {
   });
 });
 
+// retrieved the users
+const getUser = catchAsync(async (req, res) => {
+  const token = req.headers.authorization as string;
+  const result = await UserServices.getUserFromDB(token);
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'User profile retrieved successfully',
+    data: result,
+  });
+});
+
 const loginUser = catchAsync(async (req, res) => {
   const result = await UserServices.loginUser(req.body);
   sendResponse(res, {
@@ -56,10 +68,24 @@ const resetPassword = catchAsync(async (req, res) => {
   });
 });
 
+const updateUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await UserServices.updateUserIntoDB(id, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User info updated successfully',
+    data: result,
+  });
+});
+
 export const UserController = {
   createUser,
   getAllUserFromDB,
+  getUser,
   loginUser,
   forgetPassword,
   resetPassword,
+  updateUser,
 };
