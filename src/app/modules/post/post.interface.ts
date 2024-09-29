@@ -1,10 +1,5 @@
 import { Types } from 'mongoose';
-
-export type TComment = {
-  user: Types.ObjectId;
-  post: Types.ObjectId;
-  content: string;
-};
+import { TComment } from '../comments/comment.interface';
 
 export type TPost = {
   user: Types.ObjectId;

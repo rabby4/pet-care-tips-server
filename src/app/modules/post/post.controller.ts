@@ -9,7 +9,7 @@ const createPost = catchAsync(async (req, res) => {
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: 'Post deleted successfully',
+    message: 'Post created successfully',
     data: result,
   });
 });
@@ -60,9 +60,9 @@ const updatePost = catchAsync(async (req, res) => {
 const deletePost = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await PostServices.deletePostFromDB(id);
-  res.json({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
     success: true,
-    statusCode: 200,
     message: 'Post deleted successfully',
     data: result,
   });
