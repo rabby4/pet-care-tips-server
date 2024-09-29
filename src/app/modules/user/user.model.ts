@@ -87,4 +87,4 @@ userSchema.statics.isUserExists = async function (email: string) {
 //   return await bcrypt.compare(plainTextPassword, hashedPassword);
 // };
 
-export const User = model<TUser, UserModel>('users', userSchema);
+export const User = model<TUser, UserModel>('User', userSchema);
