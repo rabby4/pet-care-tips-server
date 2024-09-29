@@ -5,7 +5,6 @@ import { UserServices } from './user.service';
 
 const createUser = catchAsync(async (req, res) => {
   const result = await UserServices.createUserIntoDB(req.body);
-
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -14,9 +13,18 @@ const createUser = catchAsync(async (req, res) => {
   });
 });
 
+const getAllUserFromDB = catchAsync(async (req, res) => {
+  const result = await UserServices.getAllUserFromDB();
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Retrieved All User successfully',
+    data: result,
+  });
+});
+
 const loginUser = catchAsync(async (req, res) => {
   const result = await UserServices.loginUser(req.body);
-
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -50,6 +58,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
 export const UserController = {
   createUser,
+  getAllUserFromDB,
   loginUser,
   forgetPassword,
   resetPassword,

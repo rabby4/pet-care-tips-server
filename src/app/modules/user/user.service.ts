@@ -13,6 +13,11 @@ const createUserIntoDB = async (payload: TUser) => {
   return result;
 };
 
+const getAllUserFromDB = async () => {
+  const result = await User.find();
+  return result;
+};
+
 // create service function for login user
 const loginUser = async (payload: TLoginUser) => {
   console.log(payload.email, payload.password);
@@ -116,6 +121,7 @@ const resetPassword = async (
 
 export const UserServices = {
   createUserIntoDB,
+  getAllUserFromDB,
   loginUser,
   forgetPassword,
   resetPassword,

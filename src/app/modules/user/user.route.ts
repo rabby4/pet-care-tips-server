@@ -18,6 +18,9 @@ router.post(
   UserController.loginUser,
 );
 
+// get all user data
+router.get('/', UserController.getAllUserFromDB);
+
 router.post(
   '/forget-password',
   validationRequest(UserValidation.forgetPasswordValidationSchema),
