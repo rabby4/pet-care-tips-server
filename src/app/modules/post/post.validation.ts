@@ -13,7 +13,7 @@ const updatePostValidationSchema = z.object({
   }),
 });
 
-export const BikeValidation = {
+export const postValidation = {
   createPostValidationSchema,
   updatePostValidationSchema,
 };
