@@ -41,12 +41,17 @@ const userSchema = new Schema<TUser, UserModel>(
     role: {
       type: String,
       enum: ['superAdmin', 'admin', 'user'],
+      default: 'user',
     },
     followers: {
       type: Schema.Types.ObjectId,
     },
     following: {
       type: Schema.Types.ObjectId,
+    },
+    premium: {
+      type: Boolean,
+      default: false,
     },
   },
   {

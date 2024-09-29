@@ -9,11 +9,7 @@ import { sendEmail } from '../../utils/sendEmail';
 
 // create service function for create or register user
 const createUserIntoDB = async (payload: TUser) => {
-  const userData: Partial<TUser> = {
-    ...payload,
-    role: 'user',
-  };
-  const result = await User.create(userData);
+  const result = await User.create(payload);
   return result;
 };
 
@@ -37,11 +33,7 @@ const getUserFromDB = async (token: string) => {
 const loginUser = async (payload: TLoginUser) => {
   console.log(payload.email, payload.password);
   // check if the user exists
-  const isUserExists = await User.isUserExists(
-    payload.email,
-    // { email: payload.email },
-    // { createdAt: 0, updatedAt: 0, __v: 0 },
-  );
+  const isUserExists = await User.isUserExists(payload.email);
 
   if (!isUserExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'User is not exist');

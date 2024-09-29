@@ -14,6 +14,7 @@ const createUserValidationSchema = z.object({
     role: z.string().optional(),
     followers: z.string().optional(),
     following: z.string().optional(),
+    premium: z.boolean().optional(),
   }),
 });
 
@@ -57,6 +58,7 @@ const updateUserValidationSchema = z.object({
     role: z.string().optional(),
     followers: z.string().optional(),
     following: z.string().optional(),
+    premium: z.boolean().optional(),
   }),
 });
 

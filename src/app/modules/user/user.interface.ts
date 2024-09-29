@@ -15,6 +15,7 @@ export interface TUser {
   role: 'superAdmin' | 'admin' | 'user';
   followers: Types.ObjectId;
   following: Types.ObjectId;
+  premium: boolean;
 }
 export type TLoginUser = {
   email: string;

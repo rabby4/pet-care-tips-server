@@ -34,6 +34,9 @@ const postSchema = new Schema<TPost>(
     image: {
       type: String,
     },
+    category: {
+      type: String,
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -57,6 +60,10 @@ const postSchema = new Schema<TPost>(
         ref: 'Comment',
       },
     ],
+    premium: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

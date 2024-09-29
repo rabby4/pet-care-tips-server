@@ -14,6 +14,7 @@ const createPost = catchAsync(async (req, res) => {
   });
 });
 
+// get all posts from database
 const getAllPosts = catchAsync(async (req, res) => {
   const result = await PostServices.getAllPostsFromDB(req.query);
 
@@ -27,8 +28,42 @@ const getAllPosts = catchAsync(async (req, res) => {
   }
   sendResponse(res, {
     success: true,
-    statusCode: httpStatus.NOT_FOUND,
+    statusCode: httpStatus.OK,
     message: 'Posts retrieved successfully',
+    data: result,
+  });
+});
+
+const getSinglePost = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await PostServices.getSinglePostsFromDB(id);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Post retrieved successfully',
+    data: result,
+  });
+});
+
+const updatePost = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await PostServices.updatePostIntoDB(id, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Post updated successfully',
+    data: result,
+  });
+});
+
+const deletePost = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await PostServices.deletePostFromDB(id);
+  res.json({
+    success: true,
+    statusCode: 200,
+    message: 'Post deleted successfully',
     data: result,
   });
 });
@@ -36,4 +71,7 @@ const getAllPosts = catchAsync(async (req, res) => {
 export const PostController = {
   createPost,
   getAllPosts,
+  getSinglePost,
+  updatePost,
+  deletePost,
 };
