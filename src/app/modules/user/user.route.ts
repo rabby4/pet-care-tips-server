@@ -42,4 +42,7 @@ router.patch(
   UserController.updateUser,
 );
 
+// delete user from database
+router.delete('/:id', UserController.deleteUser);
+
 export const UserRoutes = router;

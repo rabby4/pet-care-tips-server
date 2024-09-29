@@ -80,6 +80,18 @@ const updateUser = catchAsync(async (req, res) => {
   });
 });
 
+// Update user information
+const deleteUser = catchAsync(async (req, res) => {
+  const result = await UserServices.deleteUserFromDB(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'User deleted successfully',
+    data: result,
+  });
+});
+
 export const UserController = {
   createUser,
   getAllUserFromDB,
@@ -88,4 +100,5 @@ export const UserController = {
   forgetPassword,
   resetPassword,
   updateUser,
+  deleteUser,
 };
