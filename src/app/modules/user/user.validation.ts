@@ -32,6 +32,17 @@ const forgetPasswordValidationSchema = z.object({
   }),
 });
 
+const resetPasswordValidationSchema = z.object({
+  body: z.object({
+    email: z.string({
+      required_error: 'Email is required!',
+    }),
+    newPassword: z.string({
+      required_error: 'New password is required!',
+    }),
+  }),
+});
+
 // const changeStatusValidationSchema = z.object({
 //   body: z.object({
 //     status: z.enum([...UserStatus] as [string, ...string[]]),
@@ -42,5 +53,6 @@ export const UserValidation = {
   createUserValidationSchema,
   loginValidationSchema,
   forgetPasswordValidationSchema,
+  resetPasswordValidationSchema,
   // changeStatusValidationSchema,
 };

@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { TLoginUser, TUser } from './user.interface';
 import AppError from '../../errors/appError';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import { User } from './user.model';
 import { sendEmail } from '../../utils/sendEmail';
@@ -75,12 +75,48 @@ const forgetPassword = async (email: string) => {
   const resetUILink = `${config.reset_password_ui_link}?id=${user._id}&token=${resetToken}`;
 
   sendEmail(user.email, resetUILink);
+};
 
-  console.log(resetUILink);
+const resetPassword = async (
+  payload: { email: string; newPassword: string },
+  token: string,
+) => {
+  // checking if the user is exists
+  const user = await User.findOne({ email: payload.email });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'The user not found!');
+  }
+
+  // check if the token is valid or not
+  const decoded = jwt.verify(
+    token,
+    config.jwt_access_token as string,
+  ) as JwtPayload;
+
+  if (payload.email !== decoded.email) {
+    throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden!');
+  }
+
+  // hash new password
+  const newHashedPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.bcrypt_salt_round),
+  );
+
+  await User.findOneAndUpdate(
+    {
+      email: decoded.email,
+    },
+    {
+      password: newHashedPassword,
+    },
+  );
 };
 
 export const UserServices = {
   createUserIntoDB,
   loginUser,
   forgetPassword,
+  resetPassword,
 };
