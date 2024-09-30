@@ -30,12 +30,6 @@ const postSchema = new Schema<TPost>(
         ref: 'User',
       },
     ],
-    comments: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Comment',
-      },
-    ],
     premium: {
       type: Boolean,
       default: false,

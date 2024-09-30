@@ -9,16 +9,16 @@ const createPostIntoDB = async (payload: TPost) => {
 
 const getAllPostsFromDB = async (query: Record<string, unknown>) => {
   const postQuery = new QueryBuilder(
-    Post.find()
-      .populate('user')
-      .populate({
-        path: 'upvote',
-        select: 'firstName lastName image',
-      })
-      .populate({
-        path: 'downvote',
-        select: 'firstName lastName image',
-      }),
+    Post.find(),
+    // .populate('user')
+    // .populate({
+    //   path: 'upvote',
+    //   select: 'firstName lastName image',
+    // })
+    // .populate({
+    //   path: 'downvote',
+    //   select: 'firstName lastName image',
+    // }),
     query,
   )
     .search(['content'])

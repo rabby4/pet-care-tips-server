@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { TComment } from '../comments/comment.interface';
 
 export type TPost = {
   user: Types.ObjectId;
@@ -9,5 +8,4 @@ export type TPost = {
   premium: boolean;
   upvote: Types.ObjectId[];
   downvote: Types.ObjectId[];
-  comments: TComment[];
 };
