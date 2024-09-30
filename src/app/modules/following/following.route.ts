@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post('/', FollowingController.createFollowing);
 
-// get route for comment based on post id
+// get route for user based on post id
 router.get('/:userId', FollowingController.getAllFollowingForPost);
 
 export const FollowingRoutes = router;
