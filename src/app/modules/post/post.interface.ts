@@ -6,6 +6,4 @@ export type TPost = {
   image: string;
   category: string;
   premium: boolean;
-  upvote: Types.ObjectId[];
-  downvote: Types.ObjectId[];
 };

@@ -18,18 +18,6 @@ const postSchema = new Schema<TPost>(
       ref: 'User',
       required: true,
     },
-    upvote: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
-    downvote: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
     premium: {
       type: Boolean,
       default: false,

@@ -6,6 +6,12 @@ const createUpvoteIntoDB = async (payload: TUpvote) => {
   return result;
 };
 
+const getAllUpvoteForPostFromDB = async (id: string) => {
+  const result = await Upvote.find({ post: id });
+  return result;
+};
+
 export const UpvoteServices = {
   createUpvoteIntoDB,
+  getAllUpvoteForPostFromDB
 };
