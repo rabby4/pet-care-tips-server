@@ -23,8 +23,19 @@ const getAllFollowingForPost = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const getAllFollowerForPost = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const result = await FollowingServices.getAllFollowerForUserFromDB(userId);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Following retrieved successfully',
+    data: result,
+  });
+});
 
 export const FollowingController = {
   createFollowing,
   getAllFollowingForPost,
+  getAllFollowerForPost,
 };

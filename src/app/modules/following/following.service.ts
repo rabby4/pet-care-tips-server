@@ -11,7 +11,13 @@ const getAllFollowingForUserFromDB = async (id: string) => {
   return result;
 };
 
+const getAllFollowerForUserFromDB = async (id: string) => {
+  const result = await Following.find({ following: id });
+  return result;
+};
+
 export const FollowingServices = {
   createFollowingIntoDB,
   getAllFollowingForUserFromDB,
+  getAllFollowerForUserFromDB,
 };

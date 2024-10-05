@@ -13,8 +13,6 @@ export interface TUser {
   about: string;
   image: string;
   role: 'superAdmin' | 'admin' | 'user';
-  followers: Types.ObjectId;
-  following: Types.ObjectId;
   premium: boolean;
 }
 export type TLoginUser = {

@@ -33,6 +33,26 @@ const getAllPosts = catchAsync(async (req, res) => {
     data: result,
   });
 });
+// get all posts from database
+const getAllUserPosts = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const result = await PostServices.getAllUserPostsFromDB(userId, req.query);
+
+  if (!result.length) {
+    sendResponse(res, {
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
+      message: 'No Data Found',
+      data: result,
+    });
+  }
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Posts retrieved successfully',
+    data: result,
+  });
+});
 
 const getSinglePost = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -71,6 +91,7 @@ const deletePost = catchAsync(async (req, res) => {
 export const PostController = {
   createPost,
   getAllPosts,
+  getAllUserPosts,
   getSinglePost,
   updatePost,
   deletePost,

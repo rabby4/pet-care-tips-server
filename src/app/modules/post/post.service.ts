@@ -9,8 +9,32 @@ const createPostIntoDB = async (payload: TPost) => {
 
 const getAllPostsFromDB = async (query: Record<string, unknown>) => {
   const postQuery = new QueryBuilder(
-    Post.find(),
-    // .populate('user')
+    Post.find().populate('user'),
+    // .populate({
+    //   path: 'upvote',
+    //   select: 'firstName lastName image',
+    // })
+    // .populate({
+    //   path: 'downvote',
+    //   select: 'firstName lastName image',
+    // }),
+    query,
+  )
+    .search(['content'])
+    .filter()
+    .sort()
+    .fields();
+
+  const result = await postQuery.modelQuery;
+  return result;
+};
+
+const getAllUserPostsFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  const postQuery = new QueryBuilder(
+    Post.find({ user: userId }).populate('user'),
     // .populate({
     //   path: 'upvote',
     //   select: 'firstName lastName image',
@@ -52,6 +76,7 @@ const deletePostFromDB = async (id: string) => {
 export const PostServices = {
   createPostIntoDB,
   getAllPostsFromDB,
+  getAllUserPostsFromDB,
   getSinglePostsFromDB,
   updatePostIntoDB,
   deletePostFromDB,

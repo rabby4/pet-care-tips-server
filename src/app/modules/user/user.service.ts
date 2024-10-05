@@ -8,9 +8,37 @@ import { User } from './user.model';
 import { sendEmail } from '../../utils/sendEmail';
 
 // create service function for create or register user
-const createUserIntoDB = async (payload: TUser) => {
-  const result = await User.create(payload);
-  return result;
+const register = async (payload: TUser) => {
+  // payload.image = image;
+  // checking if the user is exist
+  const user = await User.isUserExists(payload?.email);
+
+  if (user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is already exist!');
+  }
+
+  const newUser = await User.create(payload);
+
+  // create access token
+  const userData = {
+    id: newUser.id,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    email: newUser.email,
+    phone: newUser.phone,
+    address: newUser.address,
+    occupation: newUser.occupation,
+    about: newUser.about,
+    image: newUser.image,
+    role: newUser.role,
+    premium: newUser.premium,
+  };
+
+  const accessToken = jwt.sign(userData, config.jwt_access_token as string, {
+    expiresIn: '10d',
+  });
+
+  return accessToken;
 };
 
 const getAllUserFromDB = async () => {
@@ -31,18 +59,17 @@ const getUserFromDB = async (token: string) => {
 
 // create service function for login user
 const loginUser = async (payload: TLoginUser) => {
-  console.log(payload.email, payload.password);
   // check if the user exists
-  const isUserExists = await User.isUserExists(payload.email);
+  const user = await User.isUserExists(payload.email);
 
-  if (!isUserExists) {
+  if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User is not exist');
   }
 
   // checking if the password matched
   const isPasswordMatched = await bcrypt.compare(
     payload?.password,
-    isUserExists.password,
+    user.password,
   );
 
   if (!isPasswordMatched) {
@@ -50,18 +77,23 @@ const loginUser = async (payload: TLoginUser) => {
   }
   // create access token
   const userData = {
-    id: isUserExists.id,
-    email: isUserExists.email,
-    role: isUserExists.role,
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    address: user.address,
+    occupation: user.occupation,
+    about: user.about,
+    image: user.image,
+    role: user.role,
+    premium: user.premium,
   };
 
   const accessToken = jwt.sign(userData, config.jwt_access_token as string, {
     expiresIn: '10d',
   });
-  return {
-    accessToken,
-    isUserExists,
-  };
+  return accessToken;
 };
 
 const forgetPassword = async (email: string) => {
@@ -141,7 +173,7 @@ const deleteUserFromDB = async (id: string) => {
 };
 
 export const UserServices = {
-  createUserIntoDB,
+  register,
   getAllUserFromDB,
   getUserFromDB,
   loginUser,

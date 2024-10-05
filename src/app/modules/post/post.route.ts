@@ -10,6 +10,7 @@ router.post(
   PostController.createPost,
 );
 router.get('/', PostController.getAllPosts);
+router.get('/:userId', PostController.getAllUserPosts);
 router.get('/:id', PostController.getSinglePost);
 router.patch(
   '/:id',
