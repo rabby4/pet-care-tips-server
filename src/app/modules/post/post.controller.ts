@@ -5,7 +5,14 @@ import { PostServices } from './post.service';
 
 // create post information
 const createPost = catchAsync(async (req, res) => {
-  const result = await PostServices.createPostIntoDB(req.body);
+  // console.log(req.body.data);
+  // console.log(req.file);
+  const data = {
+    ...JSON.parse(req.body.data),
+    image: req.file?.path,
+  };
+  console.log(data);
+  const result = await PostServices.createPostIntoDB(data);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -38,14 +45,6 @@ const getAllUserPosts = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const result = await PostServices.getAllUserPostsFromDB(userId, req.query);
 
-  if (!result.length) {
-    sendResponse(res, {
-      success: false,
-      statusCode: httpStatus.NOT_FOUND,
-      message: 'No Data Found',
-      data: result,
-    });
-  }
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,

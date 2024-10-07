@@ -47,6 +47,9 @@ const userSchema = new Schema<TUser, UserModel>(
       type: Boolean,
       default: false,
     },
+    dateOfBirth: {
+      type: String,
+    },
   },
   {
     timestamps: true,

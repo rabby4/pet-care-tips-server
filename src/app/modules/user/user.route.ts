@@ -40,7 +40,8 @@ router.post(
 
 router.patch(
   '/:id',
-  validationRequest(UserValidation.updateUserValidationSchema),
+  multerUpload.single('image'),
+  // validationRequest(UserValidation.updateUserValidationSchema),
   UserController.updateUser,
 );
 

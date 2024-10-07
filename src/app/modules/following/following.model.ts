@@ -2,14 +2,14 @@ import { model, Schema } from 'mongoose';
 import { TFollowing } from './following.interface';
 
 const followingSchema = new Schema<TFollowing>({
-  user: {
+  follower: {
     type: Schema.Types.ObjectId,
-    ref: 'Post',
+    ref: 'User',
     required: true,
   },
   following: {
     type: Schema.Types.ObjectId,
-    ref: 'Post',
+    ref: 'User',
     required: true,
   },
 });

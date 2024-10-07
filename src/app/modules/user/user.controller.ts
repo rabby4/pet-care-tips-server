@@ -4,8 +4,6 @@ import sendResponse from '../../utils/sendResponse';
 import { UserServices } from './user.service';
 
 const register = catchAsync(async (req, res) => {
-  console.log(req.body);
-  console.log(req.file);
   const result = await UserServices.register({
     ...JSON.parse(req.body.data),
     image: req.file?.path,
@@ -15,7 +13,7 @@ const register = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     message: 'User registered successfully',
     data: result,
-    // token: result,
+    token: result,
   });
 });
 
@@ -76,7 +74,10 @@ const resetPassword = catchAsync(async (req, res) => {
 
 const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await UserServices.updateUserIntoDB(id, req.body);
+  const result = await UserServices.updateUserIntoDB(id, {
+    ...JSON.parse(req.body.data),
+    image: req.file?.path,
+  });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

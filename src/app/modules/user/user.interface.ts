@@ -14,6 +14,7 @@ export interface TUser {
   image: string;
   role: 'superAdmin' | 'admin' | 'user';
   premium: boolean;
+  dateOfBirth: string;
 }
 export type TLoginUser = {
   email: string;

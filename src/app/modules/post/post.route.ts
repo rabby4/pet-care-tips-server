@@ -2,11 +2,13 @@ import express from 'express';
 import { PostController } from './post.controller';
 import { postValidation } from './post.validation';
 import validationRequest from '../../middleware/validationRequest';
+import { multerUpload } from '../../config/multer.config';
 const router = express.Router();
 
 router.post(
   '/',
-  validationRequest(postValidation.createPostValidationSchema),
+  multerUpload.single('image'),
+  // validationRequest(postValidation.createPostValidationSchema),
   PostController.createPost,
 );
 router.get('/', PostController.getAllPosts);
