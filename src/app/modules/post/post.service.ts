@@ -7,25 +7,69 @@ const createPostIntoDB = async (payload: TPost) => {
   return result;
 };
 
-const getAllPostsFromDB = async (query: Record<string, unknown>) => {
-  const postQuery = new QueryBuilder(
-    Post.find().populate('user'),
-    // .populate({
-    //   path: 'upvote',
-    //   select: 'firstName lastName image',
-    // })
-    // .populate({
-    //   path: 'downvote',
-    //   select: 'firstName lastName image',
-    // }),
-    query,
-  )
-    .search(['content'])
-    .filter()
-    .sort()
-    .fields();
+// const getAllPostsFromDB = async (query: Record<string, unknown>) => {
+//   const postQuery = new QueryBuilder(
+//     Post.find().populate('user'),
+//     // .populate({
+//     //   path: 'upvote',
+//     //   select: 'firstName lastName image',
+//     // })
+//     // .populate({
+//     //   path: 'downvote',
+//     //   select: 'firstName lastName image',
+//     // }),
+//     query,
+//   )
+//     .search(['content'])
+//     .filter()
+//     .sort()
+//     .fields();
+//
+//   const result = await postQuery.modelQuery;
+//   return result;
+// };
 
-  const result = await postQuery.modelQuery;
+const getAllPostsFromDB = async (
+  query: Record<string, unknown>,
+  searchQuery: string,
+) => {
+  const postQuery = Post.aggregate([
+    { $match: query },
+    ...(searchQuery
+      ? [
+          {
+            $match: {
+              content: { $regex: searchQuery, $options: 'i' },
+            },
+          },
+        ]
+      : []),
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'user',
+        foreignField: '_id',
+        as: 'user',
+      },
+    },
+    { $unwind: '$user' },
+    {
+      $lookup: {
+        from: 'upvotes',
+        localField: '_id',
+        foreignField: 'post',
+        as: 'upvotes',
+      },
+    },
+    {
+      $addFields: {
+        upvoteCount: { $size: '$upvotes' },
+      },
+    },
+    { $sort: { upvoteCount: -1 } },
+  ]);
+
+  const result = await postQuery;
   return result;
 };
 
@@ -55,7 +99,7 @@ const getAllUserPostsFromDB = async (
 };
 
 const getSinglePostsFromDB = async (id: string) => {
-  const result = await Post.findById(id);
+  const result = await Post.findById(id).populate('user');
   return result;
 };
 

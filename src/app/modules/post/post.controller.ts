@@ -23,7 +23,8 @@ const createPost = catchAsync(async (req, res) => {
 
 // get all posts from database
 const getAllPosts = catchAsync(async (req, res) => {
-  const result = await PostServices.getAllPostsFromDB(req.query);
+  const { search, ...query } = req.query;
+  const result = await PostServices.getAllPostsFromDB(query, search as string);
 
   if (!result.length) {
     sendResponse(res, {
@@ -40,6 +41,7 @@ const getAllPosts = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
 // get all posts from database
 const getAllUserPosts = catchAsync(async (req, res) => {
   const { userId } = req.params;

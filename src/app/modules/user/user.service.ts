@@ -35,10 +35,48 @@ const register = async (payload: TUser) => {
   };
 
   const accessToken = jwt.sign(userData, config.jwt_access_token as string, {
-    expiresIn: '10d',
+    expiresIn: '30d',
+  });
+  const refreshToken = jwt.sign(userData, config.jwt_refresh_token as string, {
+    expiresIn: '365d',
   });
 
-  return accessToken;
+  return { accessToken, refreshToken };
+};
+
+const refreshToken = async (token: string) => {
+  // check if the token is valid or not
+  const decoded = jwt.verify(token, config.jwt_refresh_token as string);
+
+  const { _id } = decoded as JwtPayload;
+
+  // checking if the user is exists
+  const user = await User.isUserExists(_id);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'The user not found!');
+  }
+
+  // create access token
+  const userData = {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    address: user.address,
+    occupation: user.occupation,
+    about: user.about,
+    image: user.image,
+    role: user.role,
+    premium: user.premium,
+  };
+
+  const accessToken = jwt.sign(userData, config.jwt_access_token as string, {
+    expiresIn: '30d',
+  });
+
+  return { accessToken };
 };
 
 const getAllUserFromDB = async () => {
@@ -93,13 +131,15 @@ const loginUser = async (payload: TLoginUser) => {
   const accessToken = jwt.sign(userData, config.jwt_access_token as string, {
     expiresIn: '10d',
   });
-  return accessToken;
+  const refreshToken = jwt.sign(userData, config.jwt_refresh_token as string, {
+    expiresIn: '365d',
+  });
+  return { accessToken, refreshToken };
 };
 
 const forgetPassword = async (email: string) => {
   // checking if the user is exists
   const user = await User.findOne({ email });
-  console.log(user);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'The user not found!');
@@ -116,9 +156,9 @@ const forgetPassword = async (email: string) => {
     expiresIn: '10m',
   });
 
-  const resetUILink = `${config.reset_password_ui_link}?id=${user._id}&token=${resetToken}`;
+  const resetUILink = `${config.reset_password_ui_link}/reset-password?email=${user.email}&token=${resetToken}`;
 
-  sendEmail(user.email, resetUILink);
+  await sendEmail(user.email, resetUILink);
 };
 
 const resetPassword = async (
@@ -174,6 +214,7 @@ const deleteUserFromDB = async (id: string) => {
 
 export const UserServices = {
   register,
+  refreshToken,
   getAllUserFromDB,
   getUserFromDB,
   loginUser,

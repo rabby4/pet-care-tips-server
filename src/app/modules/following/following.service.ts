@@ -46,12 +46,16 @@ const getFollowingStatusFromDB = async (
 };
 
 const getAllFollowingForUserFromDB = async (id: string) => {
-  const result = await Following.find({ follower: id });
+  const result = await Following.find({ follower: id })
+    .populate('following')
+    .populate('follower');
   return result;
 };
 
 const getAllFollowerForUserFromDB = async (id: string) => {
-  const result = await Following.find({ following: id });
+  const result = await Following.find({ following: id })
+    .populate('following')
+    .populate('follower');
   return result;
 };
 

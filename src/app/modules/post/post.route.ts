@@ -13,7 +13,7 @@ router.post(
 );
 router.get('/', PostController.getAllPosts);
 router.get('/:userId', PostController.getAllUserPosts);
-router.get('/:id', PostController.getSinglePost);
+router.get('/post/:id', PostController.getSinglePost);
 router.patch(
   '/:id',
   validationRequest(postValidation.updatePostValidationSchema),

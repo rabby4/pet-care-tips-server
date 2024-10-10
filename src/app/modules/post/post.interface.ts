@@ -6,4 +6,5 @@ export type TPost = {
   image?: string;
   category?: string;
   premium?: boolean;
+  publish?: boolean;
 };

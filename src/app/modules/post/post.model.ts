@@ -22,6 +22,10 @@ const postSchema = new Schema<TPost>(
       type: Boolean,
       default: false,
     },
+    publish: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

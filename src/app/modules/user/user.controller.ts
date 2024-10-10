@@ -2,18 +2,26 @@ import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { UserServices } from './user.service';
+import config from '../../config';
 
 const register = catchAsync(async (req, res) => {
   const result = await UserServices.register({
     ...JSON.parse(req.body.data),
     image: req.file?.path,
   });
+  const { refreshToken, accessToken } = result;
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: true,
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+  });
+
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: 'User registered successfully',
-    data: result,
-    token: result,
+    data: { accessToken },
   });
 });
 
@@ -41,11 +49,20 @@ const getUser = catchAsync(async (req, res) => {
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await UserServices.loginUser(req.body);
+
+  const { refreshToken, accessToken } = result;
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: true,
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+  });
+
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: 'User logged in successfully',
-    token: result,
+    data: { accessToken },
   });
 });
 
@@ -74,6 +91,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
 const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
+  console.log(req.body.data);
   const result = await UserServices.updateUserIntoDB(id, {
     ...JSON.parse(req.body.data),
     image: req.file?.path,
@@ -99,8 +117,21 @@ const deleteUser = catchAsync(async (req, res) => {
   });
 });
 
+const refreshToken = catchAsync(async (req, res) => {
+  const { refreshToken } = req.cookies;
+  const result = await UserServices.refreshToken(refreshToken);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Access Token is retrieved successfully',
+    data: result,
+  });
+});
+
 export const UserController = {
   register,
+  refreshToken,
   getAllUserFromDB,
   getUser,
   loginUser,

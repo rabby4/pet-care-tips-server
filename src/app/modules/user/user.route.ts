@@ -34,7 +34,7 @@ router.post(
 
 router.post(
   '/reset-password',
-  validationRequest(UserValidation.resetPasswordValidationSchema),
+  // validationRequest(UserValidation.resetPasswordValidationSchema),
   UserController.resetPassword,
 );
 
@@ -47,5 +47,7 @@ router.patch(
 
 // delete user from database
 router.delete('/:id', UserController.deleteUser);
+
+router.post('/refresh-token', UserController.refreshToken);
 
 export const UserRoutes = router;
