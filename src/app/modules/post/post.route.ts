@@ -16,8 +16,10 @@ router.get('/:userId', PostController.getAllUserPosts);
 router.get('/post/:id', PostController.getSinglePost);
 router.patch(
   '/:id',
-  validationRequest(postValidation.updatePostValidationSchema),
+  multerUpload.single('image'),
+  // validationRequest(postValidation.updatePostValidationSchema),
   PostController.updatePost,
 );
+router.delete('/:id', PostController.deletePost);
 
 export const PostRoutes = router;

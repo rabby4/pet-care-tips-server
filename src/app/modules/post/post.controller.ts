@@ -5,13 +5,10 @@ import { PostServices } from './post.service';
 
 // create post information
 const createPost = catchAsync(async (req, res) => {
-  // console.log(req.body.data);
-  // console.log(req.file);
   const data = {
     ...JSON.parse(req.body.data),
     image: req.file?.path,
   };
-  console.log(data);
   const result = await PostServices.createPostIntoDB(data);
   sendResponse(res, {
     success: true,
@@ -68,7 +65,11 @@ const getSinglePost = catchAsync(async (req, res) => {
 
 const updatePost = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await PostServices.updatePostIntoDB(id, req.body);
+  const data = {
+    ...JSON.parse(req.body.data),
+    image: req.file?.path,
+  };
+  const result = await PostServices.updatePostIntoDB(id, data);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

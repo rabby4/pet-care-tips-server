@@ -26,7 +26,7 @@ const paymentForMonetization = catchAsync(async (req, res) => {
 });
 
 const getPaymentInfo = catchAsync(async (req, res) => {
-  const result = await PaymentServices.getPaymentInfoUser(req.user);
+  const result = await PaymentServices.getPaymentInfoUser();
 
   sendResponse(res, {
     statusCode: 200,

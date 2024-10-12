@@ -3,6 +3,8 @@ import cors from 'cors';
 import router from './app/router';
 import globalErrorHandler from './app/middleware/globalErrorHandler';
 import cookieParser from 'cookie-parser';
+import sendResponse from './app/utils/sendResponse';
+import httpStatus from 'http-status';
 const app = express();
 
 // parser
@@ -16,8 +18,9 @@ app.use('/api', router);
 app.use(globalErrorHandler);
 
 app.get('/', (req: Request, res: Response) => {
-  res.json({
-    status: 'Success',
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
     message: 'Welcome to Pet Care Tips and Stories API',
   });
 });

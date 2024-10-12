@@ -41,8 +41,8 @@ const getFollowingStatusFromDB = async (
     following: followingId,
   });
 
-  // If a record is found, return true, otherwise false
-  return !!followRecord; // Returns true if a follow relationship exists, otherwise false
+ 
+  return !!followRecord;
 };
 
 const getAllFollowingForUserFromDB = async (id: string) => {

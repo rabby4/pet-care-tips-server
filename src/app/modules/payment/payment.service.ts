@@ -150,16 +150,8 @@ const paymentForMonetization = async (payload: TPayment) => {
   };
 };
 
-const getPaymentInfoUser = async (loggerUser: JwtPayload) => {
-  const payment = await User.findOne({
-    email: loggerUser.email,
-    premiumMember: true,
-  });
-
-  if (!payment) {
-    throw new AppError(httpStatus.OK, 'User not found');
-  }
-
+const getPaymentInfoUser = async () => {
+  const payment = await Payment.find();
   return payment;
 };
 
