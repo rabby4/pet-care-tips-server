@@ -21,8 +21,8 @@ To set up the Cirkel backend locally, follow these steps:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/cirkel-backend.git
-   cd cirkel-backend
+   git clone https://github.com/rabby4/pet-care-tips-server.git
+   cd pet-care-tips-server
    ```
 
 2. **Clone the repository:**
