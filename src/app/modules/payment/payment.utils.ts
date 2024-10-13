@@ -15,8 +15,8 @@ export const initiatePayment = async (paymentData: TPaymentInfo) => {
   const res = await axios.post(config.payment_url!, {
     store_id: config.store_id,
     tran_id: paymentData.trxId,
-    success_url: `http://localhost:5000/api/payments/confirmation?trxId=${paymentData.trxId}&status=success&email=${paymentData.customerEmail}`,
-    fail_url: `http://localhost:5000/api/payments/confirmation?status=failed`,
+    success_url: `https://pet-care-tips-server.vercel.app/api/payments/confirmation?trxId=${paymentData.trxId}&status=success&email=${paymentData.customerEmail}`,
+    fail_url: `https://pet-care-tips-server.vercel.app/api/payments/confirmation?status=failed`,
     cancel_url: config.client_url,
     amount: paymentData.amount,
     currency: 'BDT',
