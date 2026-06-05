@@ -1,3 +1,5 @@
+import httpStatus from 'http-status';
+import AppError from '../../errors/appError';
 import { Downvote } from '../downvote/downvote.model';
 import { TUpvote } from './upvote.interface';
 import { Upvote } from './upvote.model';
@@ -14,7 +16,7 @@ const createUpvoteIntoDB = async (payload: TUpvote) => {
   });
 
   if (isExitsUpVote || isExitsDownVote) {
-    throw new Error('User already upvoted this post');
+    throw new AppError(httpStatus.CONFLICT, 'You already voted on this post!');
   }
 
   const result = await Upvote.create(payload);

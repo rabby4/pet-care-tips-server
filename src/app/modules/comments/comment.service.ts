@@ -1,9 +1,14 @@
 import { TComment } from './comment.interface';
 import { Comment } from './comment.model';
 
-const createCommentIntoDB = async (payload: TComment) => {
+const createCommentIntoDB = async (payload: TComment | Record<string, unknown>) => {
   const result = await Comment.create(payload);
   return result;
+};
+
+// raw lookup used by controllers for ownership checks
+const getCommentById = async (id: string) => {
+  return await Comment.findById(id);
 };
 
 const getAllCommentsForPostFromDB = async (id: string) => {
@@ -27,6 +32,7 @@ const deleteCommentFromDB = async (id: string) => {
 
 export const CommentServices = {
   createCommentIntoDB,
+  getCommentById,
   getAllCommentsForPostFromDB,
   updateCommentIntoDB,
   deleteCommentFromDB,

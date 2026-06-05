@@ -9,7 +9,8 @@ type TResponse<T> = {
 };
 
 const sendResponse = <T>(res: Response, data: TResponse<T>) => {
-  res.json({
+  // actually apply the status code instead of only echoing it in the body
+  res.status(Number(data.statusCode) || 200).json({
     success: data.success,
     statusCode: data.statusCode,
     message: data.message,

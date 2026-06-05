@@ -3,28 +3,31 @@ import { UserValidation } from './user.validation';
 import validationRequest from '../../middleware/validationRequest';
 import { UserController } from './user.controller';
 import { multerUpload } from '../../config/multer.config';
+import { parseBody } from '../../middleware/bodyParser';
+import auth, { optionalAuth } from '../../middleware/auth';
 const router = express.Router();
 
 // sign up user route
 router.post(
   '/signup',
   multerUpload.single('image'),
-  // validationRequest(UserValidation.createUserValidationSchema),
+  parseBody,
+  validationRequest(UserValidation.createUserValidationSchema),
   UserController.register,
 );
 
-// sign up user route
+// login user route
 router.post(
   '/login',
   validationRequest(UserValidation.loginValidationSchema),
   UserController.loginUser,
 );
 
-// get all user data
-router.get('/', UserController.getAllUserFromDB);
+// get all user data (public list is limited to safe fields; admins get full data)
+router.get('/', optionalAuth, UserController.getAllUserFromDB);
 
-// get all user data
-router.get('/me', UserController.getUser);
+// get the logged-in user's own profile
+router.get('/me', auth(), UserController.getUser);
 
 router.post(
   '/forget-password',
@@ -34,19 +37,22 @@ router.post(
 
 router.post(
   '/reset-password',
-  // validationRequest(UserValidation.resetPasswordValidationSchema),
+  validationRequest(UserValidation.resetPasswordValidationSchema),
   UserController.resetPassword,
 );
 
+// update own profile (admins can update anyone)
 router.patch(
   '/:id',
+  auth(),
   multerUpload.single('image'),
-  // validationRequest(UserValidation.updateUserValidationSchema),
+  parseBody,
+  validationRequest(UserValidation.updateUserValidationSchema),
   UserController.updateUser,
 );
 
-// delete user from database
-router.delete('/:id', UserController.deleteUser);
+// delete own account (admins can delete anyone)
+router.delete('/:id', auth(), UserController.deleteUser);
 
 router.post('/refresh-token', UserController.refreshToken);
 

@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 const createCommentValidationSchema = z.object({
   body: z.object({
-    user: z.string(),
-    post: z.string(),
+    // the author is taken from the auth token, not the request body
+    post: z.string({ required_error: 'Post id is required!' }),
     content: z.string({ required_error: 'Please write something...!' }),
   }),
 });

@@ -12,11 +12,15 @@ export interface TPaymentInfo {
 }
 
 export const initiatePayment = async (paymentData: TPaymentInfo) => {
+  // the confirmation endpoint identifies the order by trxId only;
+  // it never trusts user identity from the callback URL
+  const confirmationBase = `${config.server_url}/api/payments/confirmation`;
+
   const res = await axios.post(config.payment_url!, {
     store_id: config.store_id,
     tran_id: paymentData.trxId,
-    success_url: `https://pet-care-tips-server.vercel.app/api/payments/confirmation?trxId=${paymentData.trxId}&status=success&email=${paymentData.customerEmail}`,
-    fail_url: `https://pet-care-tips-server.vercel.app/api/payments/confirmation?status=failed`,
+    success_url: `${confirmationBase}?trxId=${paymentData.trxId}&status=success`,
+    fail_url: `${confirmationBase}?trxId=${paymentData.trxId}&status=failed`,
     cancel_url: config.client_url,
     amount: paymentData.amount,
     currency: 'BDT',

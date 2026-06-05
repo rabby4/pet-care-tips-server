@@ -43,11 +43,18 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     statuscode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSources = simplifiedError?.errorSources;
-  } else if (err?.code === 409) {
-    const simplifiedError = handleDuplicateError(err);
-    statuscode = simplifiedError?.statusCode;
-    message = simplifiedError?.message;
-    errorSources = simplifiedError?.errorSources;
+  } else if (
+    err?.name === 'JsonWebTokenError' ||
+    err?.name === 'TokenExpiredError'
+  ) {
+    statuscode = 401;
+    message = 'Invalid or expired token!';
+    errorSources = [
+      {
+        path: '',
+        message,
+      },
+    ];
   } else if (err instanceof AppError) {
     statuscode = err?.statusCode;
     message = err?.message;
@@ -67,11 +74,11 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     ];
   }
 
+  // never leak the raw error object to clients; stack only in development
   return res.status(statuscode).json({
     success: false,
     message,
     errorSources,
-    err,
     stack: config.NODE_ENV === 'development' ? err?.stack : null,
   });
 };

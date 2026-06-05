@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import { User } from '../user/user.model';
@@ -5,26 +6,12 @@ import { initiatePayment, TPaymentInfo, verifyPayment } from './payment.utils';
 import httpStatus from 'http-status';
 import AppError from '../../errors/appError';
 import { Payment } from './payment.model';
-import { TPayment } from './payment.interface';
 
-const confirmationService = async (
-  trxId: string,
-  status: string,
-  email: string,
-) => {
-  const verifyResponse = await verifyPayment(trxId);
+// the premium price is fixed on the server; the client can't choose what to pay
+const PREMIUM_PRICE = Number(config.premium_price) || 100;
 
-  if (verifyResponse && verifyResponse?.pay_status === 'Successful') {
-    await User.findOneAndUpdate(
-      { email },
-      {
-        premium: true,
-      },
-      { new: true },
-    );
-  }
-
-  const successTemplate = `
+const buildResultPage = (isSuccess: boolean) => {
+  return `
     <html>
       <head>
         <style>
@@ -65,7 +52,7 @@ const confirmationService = async (
             padding: 20px 55px;
             font-weight: 600;
           }
-          
+
           .success {
             color: #111;
           }
@@ -90,36 +77,97 @@ const confirmationService = async (
       </head>
 
       <body>
-		    <div class="main">
-			    <h2>Your payment is ${status === 'success' ? 'Successful' : 'Canceled'}</h2>
-			    <p>We received your payment. Now you can go home page</p>
-			    <a href="${config.client_url}" class="redirect-link ${status === 'success' ? 'success-link' : 'cancel-link'}">
-            ${status === 'success' ? 'Go to Home' : 'Try Again Payment'}
+        <div class="main">
+          <h2>Your payment is ${isSuccess ? 'Successful' : 'Canceled'}</h2>
+          <p>${
+            isSuccess
+              ? 'We received your payment. Now you can go home page'
+              : 'The payment could not be verified. Please try again.'
+          }</p>
+          <a href="${config.client_url}" class="redirect-link ${isSuccess ? 'success-link' : 'cancel-link'}">
+            ${isSuccess ? 'Go to Home' : 'Try Again Payment'}
           </a>
-		    </div>
-	    </body>
+        </div>
+      </body>
     </html>
   `;
-
-  return successTemplate;
 };
 
-const paymentForMonetization = async (payload: TPayment) => {
-  const isExistUser = await User.findOne({ email: payload.email });
+// gateway callback: identify the order by trxId, verify with the gateway,
+// and only then grant premium to the user stored on the payment record
+const confirmationService = async (trxId?: string) => {
+  let isSuccess = false;
+
+  if (trxId) {
+    const payment = await Payment.findOne({ trxId });
+
+    if (payment) {
+      if (payment.status === 'successful') {
+        // already processed (replayed callback) - nothing more to do
+        isSuccess = true;
+      } else {
+        let verifyResponse;
+        try {
+          verifyResponse = await verifyPayment(trxId);
+        } catch {
+          // gateway unreachable -> mark failed, never grant premium
+          verifyResponse = null;
+        }
+
+        // fail closed: a missing/unparseable amount counts as not verified
+        const verifiedAmount = Number(
+          String(verifyResponse?.amount ?? '').replace(/[^\d.]/g, ''),
+        );
+        const amountOk =
+          !Number.isNaN(verifiedAmount) && verifiedAmount >= payment.amount;
+
+        if (verifyResponse?.pay_status === 'Successful' && amountOk) {
+          // one-shot transition so racing callbacks can't double-process
+          // or resurrect a record another callback already marked failed
+          const updated = await Payment.updateOne(
+            { trxId, status: 'pending' },
+            { status: 'successful' },
+          );
+
+          if (updated.modifiedCount === 1) {
+            await User.findByIdAndUpdate(payment.userId, { premium: true });
+          }
+          isSuccess = true;
+        } else {
+          await Payment.updateOne(
+            { trxId, status: 'pending' },
+            { status: 'failed' },
+          );
+        }
+      }
+    }
+  }
+
+  return buildResultPage(isSuccess);
+};
+
+// the paying user comes from the auth token; premium is granted ONLY after
+// the gateway confirms the payment (see confirmationService)
+const paymentForMonetization = async (requester: JwtPayload) => {
+  const isExistUser = await User.findById(requester.id);
 
   if (!isExistUser) {
-    throw new AppError(httpStatus.OK, 'User not found');
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
   if (isExistUser.premium) {
-    throw new AppError(httpStatus.OK, 'You are already a premium member');
+    throw new AppError(
+      httpStatus.CONFLICT,
+      'You are already a premium member',
+    );
   }
 
-  const trxId = `TrxID-${Date.now()}`;
+  // non-guessable transaction id
+  const trxId = `TrxID-${crypto.randomBytes(10).toString('hex')}`;
 
   const paymentInfo: TPaymentInfo = {
     trxId,
-    amount: payload.amount,
+    amount: PREMIUM_PRICE,
     customerName: `${isExistUser.firstName} ${isExistUser.lastName}`,
     customerEmail: isExistUser.email,
     customerPhone: isExistUser.phone || 'not available',
@@ -131,18 +179,10 @@ const paymentForMonetization = async (payload: TPayment) => {
   const result = await Payment.create({
     userId: isExistUser._id,
     trxId,
-    email: payload.email,
-    amount: payload.amount,
+    email: isExistUser.email,
+    amount: PREMIUM_PRICE,
+    status: 'pending',
   });
-
-  if (isExistUser) {
-    await User.findOneAndUpdate(
-      { email: payload.email },
-      {
-        premium: true,
-      },
-    );
-  }
 
   return {
     result,

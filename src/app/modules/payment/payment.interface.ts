@@ -5,4 +5,5 @@ export interface TPayment {
   trxId: string;
   email: string;
   amount: number;
+  status?: 'pending' | 'successful' | 'failed';
 }

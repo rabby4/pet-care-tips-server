@@ -14,4 +14,7 @@ const upvoteSchema = new Schema<TUpvote>({
   },
 });
 
+// one upvote per user per post, enforced by the database
+upvoteSchema.index({ user: 1, post: 1 }, { unique: true });
+
 export const Upvote = model<TUpvote>('Upvote', upvoteSchema);

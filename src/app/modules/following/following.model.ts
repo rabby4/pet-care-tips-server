@@ -14,4 +14,7 @@ const followingSchema = new Schema<TFollowing>({
   },
 });
 
+// one follow relationship per pair, enforced by the database
+followingSchema.index({ follower: 1, following: 1 }, { unique: true });
+
 export const Following = model<TFollowing>('Following', followingSchema);

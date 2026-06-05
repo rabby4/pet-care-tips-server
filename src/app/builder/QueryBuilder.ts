@@ -12,11 +12,16 @@ class QueryBuilder<T> {
   search(searchableField: string[]) {
     const searchTerm = this?.query?.searchTerm;
     if (searchTerm) {
+      // escape regex metacharacters so user input can't break/abuse the query
+      const safeTerm = String(searchTerm).replace(
+        /[.*+?^${}()|[\]\\]/g,
+        '\\$&',
+      );
       this.modelQuery = this.modelQuery.find({
         $or: searchableField?.map(
           (field) =>
             ({
-              [field]: { $regex: searchTerm, $options: 'i' },
+              [field]: { $regex: safeTerm, $options: 'i' },
             }) as FilterQuery<T>,
         ),
       });
@@ -42,8 +47,8 @@ class QueryBuilder<T> {
   }
 
   paginate() {
-    const page = Number(this?.query?.page) || 1;
-    const limit = Number(this?.query?.limit) || 10;
+    const page = Math.max(Number(this?.query?.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(this?.query?.limit) || 10, 1), 100);
     const skip = (page - 1) * limit;
 
     this.modelQuery = this.modelQuery.skip(skip).limit(limit);

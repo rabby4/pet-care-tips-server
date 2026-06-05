@@ -1,21 +1,20 @@
-import { Request, Response } from 'express';
 import { PaymentServices } from './payment.service';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 
-const confirmationController = async (req: Request, res: Response) => {
-  const { trxId, status, email } = req.query;
+const confirmationController = catchAsync(async (req, res) => {
+  const { trxId } = req.query;
 
+  // only the transaction id is trusted; the user/status are resolved server-side
   const result = await PaymentServices.confirmationService(
-    trxId as string,
-    status as string,
-    email as string,
+    trxId as string | undefined,
   );
   res.send(result);
-};
+});
 
 const paymentForMonetization = catchAsync(async (req, res) => {
-  const result = await PaymentServices.paymentForMonetization(req.body);
+  // the paying user comes from the verified token, not the request body
+  const result = await PaymentServices.paymentForMonetization(req.user);
 
   sendResponse(res, {
     statusCode: 200,

@@ -3,10 +3,12 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { UserServices } from './user.service';
 import config from '../../config';
+import AppError from '../../errors/appError';
+import { extractToken, isAdminRole } from '../../middleware/auth';
 
 const register = catchAsync(async (req, res) => {
   const result = await UserServices.register({
-    ...JSON.parse(req.body.data),
+    ...req.body,
     image: req.file?.path,
   });
   const { refreshToken, accessToken } = result;
@@ -14,19 +16,19 @@ const register = catchAsync(async (req, res) => {
     secure: config.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: true,
-    maxAge: 1000 * 60 * 60 * 24 * 365,
+    maxAge: 1000 * 60 * 60 * 24 * 30,
   });
 
   sendResponse(res, {
     success: true,
-    statusCode: httpStatus.OK,
+    statusCode: httpStatus.CREATED,
     message: 'User registered successfully',
     data: { accessToken },
   });
 });
 
 const getAllUserFromDB = catchAsync(async (req, res) => {
-  const result = await UserServices.getAllUserFromDB();
+  const result = await UserServices.getAllUserFromDB(req.user);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -35,13 +37,12 @@ const getAllUserFromDB = catchAsync(async (req, res) => {
   });
 });
 
-// retrieved the users
+// retrieved the logged-in user (req.user is set by the auth middleware)
 const getUser = catchAsync(async (req, res) => {
-  const token = req.headers.authorization as string;
-  const result = await UserServices.getUserFromDB(token);
+  const result = await UserServices.getUserFromDB(req.user.id as string);
   sendResponse(res, {
     success: true,
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     message: 'User profile retrieved successfully',
     data: result,
   });
@@ -55,7 +56,7 @@ const loginUser = catchAsync(async (req, res) => {
     secure: config.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: true,
-    maxAge: 1000 * 60 * 60 * 24 * 365,
+    maxAge: 1000 * 60 * 60 * 24 * 30,
   });
 
   sendResponse(res, {
@@ -68,7 +69,6 @@ const loginUser = catchAsync(async (req, res) => {
 
 const forgetPassword = catchAsync(async (req, res) => {
   const email = req.body.email;
-  console.log(req.body);
   const result = await UserServices.forgetPassword(email);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -79,7 +79,12 @@ const forgetPassword = catchAsync(async (req, res) => {
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-  const token = req.headers.authorization as string;
+  const token = extractToken(req.headers.authorization);
+
+  if (!token) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
+  }
+
   const result = await UserServices.resetPassword(req.body, token);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -91,11 +96,34 @@ const resetPassword = catchAsync(async (req, res) => {
 
 const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
-  console.log(req.body.data);
-  const result = await UserServices.updateUserIntoDB(id, {
-    ...JSON.parse(req.body.data),
+  const isAdmin = isAdminRole(req.user.role);
+
+  // users may only edit their own profile
+  if (req.user.id !== id && !isAdmin) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'You can only update your own profile!',
+    );
+  }
+
+  const payload: Record<string, unknown> = {
+    ...req.body,
     image: req.file?.path,
-  });
+  };
+
+  if (!req.file?.path) {
+    delete payload.image;
+  }
+
+  // privileged fields cannot be changed through profile updates
+  delete payload.password;
+  if (!isAdmin) {
+    delete payload.role;
+    delete payload.premium;
+    delete payload.email;
+  }
+
+  const result = await UserServices.updateUserIntoDB(id, payload);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -105,8 +133,17 @@ const updateUser = catchAsync(async (req, res) => {
   });
 });
 
-// Update user information
+// delete user from database
 const deleteUser = catchAsync(async (req, res) => {
+  const isAdmin = isAdminRole(req.user.role);
+
+  if (req.user.id !== req.params.id && !isAdmin) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'You can only delete your own account!',
+    );
+  }
+
   const result = await UserServices.deleteUserFromDB(req.params.id);
 
   sendResponse(res, {

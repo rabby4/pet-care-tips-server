@@ -2,22 +2,40 @@ import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { FollowingServices } from './following.service';
+import AppError from '../../errors/appError';
+import { TFollowing } from './following.interface';
 
 const createFollowing = catchAsync(async (req, res) => {
-  const result = await FollowingServices.createFollowingIntoDB(req.body);
+  if (!req.body.following) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Following user id is required!');
+  }
+
+  // the follower always comes from the verified token
+  if (String(req.body.following) === req.user.id) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'You cannot follow yourself!');
+  }
+
+  const result = await FollowingServices.createFollowingIntoDB({
+    follower: req.user.id,
+    following: req.body.following,
+  } as unknown as TFollowing);
+
   sendResponse(res, {
     success: true,
-    statusCode: httpStatus.OK,
+    statusCode: httpStatus.CREATED,
     message: 'Following successfully',
     data: result,
   });
 });
 
 const unFollowUser = catchAsync(async (req, res) => {
-  const followerId = req.params.followerId;
+  // unfollow on behalf of the logged-in user only; the target comes from
+  // the body, falling back to the route param
+  const following = req.body?.following ?? req.params.followerId;
+
   const result = await FollowingServices.unFollowUserFromDB(
-    followerId,
-    req.body,
+    req.user.id as string,
+    { following } as unknown as TFollowing,
   );
   sendResponse(res, {
     success: true,

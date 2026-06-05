@@ -5,7 +5,6 @@ import { CommentRoutes } from '../modules/comments/comment.route';
 import { UpvoteRoutes } from '../modules/upvote/upvote.route';
 import { DownvoteRoutes } from '../modules/downvote/downvote.route';
 import { FollowingRoutes } from '../modules/following/following.route';
-import { FollowerRoutes } from '../modules/follower/follower.route';
 import { PaymentRoutes } from '../modules/payment/payment.route';
 
 const router = Router();
@@ -34,10 +33,6 @@ const allRoutes = [
   {
     path: '/following',
     route: FollowingRoutes,
-  },
-  {
-    path: '/follower',
-    route: FollowerRoutes,
   },
   {
     path: '/payments',

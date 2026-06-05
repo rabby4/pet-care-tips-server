@@ -22,4 +22,6 @@ export default {
   signature_key: process.env.SIGNATURE_KEY,
   payment_verify_url: process.env.PAYMENT_VERIFY_URL,
   client_url: process.env.CLIENT_URL,
+  server_url: process.env.SERVER_URL || 'https://pet-care-tips-server.vercel.app',
+  premium_price: process.env.PREMIUM_PRICE || 100,
 };
